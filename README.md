@@ -18,11 +18,11 @@ ATTRIBUTES:
 
 * `duration` (string): One of 'forever', 'once', and 'repeating'. Describes how long a customer who applies this coupon will get the discount.
 * `duration_in_months` (positive integer): If duration is 'repeating', the number of months the coupon applies. Null if coupon duration is forever or once.
-* `duration_ends` (date): If duration is 'repeating', when does it end.
+* `duration_ends` (_read-only_ date): If duration is 'repeating', this is the end date.
 * `redeem_by` (date): Date after which the coupon can no longer be redeemed
 * `max_redemptions` (positive integer): Maximum number of times this coupon can be redeemed, in total, before it is no longer valid.
-* `times_redeemed` (positive integer) or zero: Number of times this coupon has been applied to a customer.
-* `valid` (boolean): Taking account of the above properties, whether this coupon can still be applied to a customer
+* `times_redeemed` (_read-only_ positive integer) or zero: Number of times this coupon has been applied to a customer.
+* `valid` (_read-only_ boolean): Taking account of the above properties, whether this coupon can still be applied to a customer
 
 **What is rewarded:**
 
