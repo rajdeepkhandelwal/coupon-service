@@ -47,16 +47,34 @@ Server will default to **http://localhost:3014**
 * `currency` (currency): If amount_off has been set, the currency of the amount to take off.
 * `metadata`: A set of key/value pairs that you can attach to a coupon object. It can be useful for storing additional information about the coupon in a structured format.
 
+### Discount (i.e. the application of a coupon to a particular user)
+
+	{
+		user, // a user ID you can refer to (String)
+		coupon, // associated Coupon
+		start, // start date (Date)
+		end, // end date (Date)
+	}
+
 
 ## REST API
+
+### Coupons
 
 List coupons
 
 	curl http://localhost:3014/coupons?password=MYPASSWORD
 
+Check/get available coupon (404 if not found)
+
+	curl http://localhost:3014/coupons/MYCOUPON?password=MYPASSWORD
+	// The ‘@’ in email is needed to determine to look for an email-based coupon
+	curl http://localhost:3014/coupons/@mit.edu?password=MYPASSWORD
+
 Create new coupon:
 
 	curl -X POST -H "Content-Type: application/json" -d '{ "code": "MYCOUPON", "percent_off": 10 }' http://localhost:3014/coupons?password=MYPASSWORD
+	// Email-based: when create discount, if user’s email contains “mit.edu”, discount will be applied
 	curl -X POST -H "Content-Type: application/json" -d '{ "email": "mit.edu", "percent_off": 10 }' http://localhost:3014/coupons?password=MYPASSWORD
 
 Update coupon:
@@ -70,6 +88,30 @@ Delete coupon:
 Delete all coupons:
 
 	curl -X DELETE http://localhost:3014/coupons/ALL?password=MYPASSWORD
+
+
+### Discounts
+
+List applied discounts for a user
+
+	curl http://localhost:3014/discounts?password=MYPASSWORD&user=548cbb2b1ad50708212193d8
+
+Apply/create new discount:
+
+	curl -X POST -H "Content-Type: application/json" -d '{ "code": "MYCOUPON", "user": "548cbb2b1ad50708212193d8" }' http://localhost:3014/discounts?password=MYPASSWORD
+	curl -X POST -H "Content-Type: application/json" -d '{ "email": "@mit.edu", "user": "548cbb2b1ad50708212193d8" }' http://localhost:3014/discounts?password=MYPASSWORD
+
+Delete discount:
+
+	curl -X DELETE http://localhost:3014/discounts/50708212193d8?password=MYPASSWORD
+
+Delete all discounts for a user:
+
+	curl -X DELETE http://localhost:3014/discounts/USER?password=MYPASSWORD&user=548cbb2b1ad50708212193d8
+
+Delete all discounts:
+
+	curl -X DELETE http://localhost:3014/discounts/ALL?password=MYPASSWORD
 
 
 ## Implementation
