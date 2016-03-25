@@ -1,17 +1,33 @@
 # Coupon Service
 
-REST API service for discount coupons/vouchers. Inspired by the [Stripe API](https://stripe.com/docs/api#coupons), but sometimes you need coupons without credit cards.
+REST API service for discount coupons/vouchers, built in Node.js.
 
-## Usage
+Inspired by the [Stripe API](https://stripe.com/docs/api#coupons), but sometimes you need coupons without credit cards.
+Also supports discounts based on (partial) email addresses, e.g. “everybody @mit.edu”.
 
-ATTRIBUTES:
+
+## How to Run
+
+Just start with:
+
+	# Set password used in API requests
+	export API_PASSWORD=MYPASSWORD
+
+	grunt
+
+Server will default to **http://localhost:3014**
+
+
+## Entities
+
+### Coupon
 
 * `_id` (string)
 * `created` (date)
 
 **Qualifiers:**
 
-* `code` (string): the coupon code.
+* `code` (string): the coupon code. Will be generated if not provided when coupon created.
 * `email` (string): a _partial_ email address (e.g. all with ".edu" in email gets the discount).
 
 **Constraints:**
@@ -32,18 +48,7 @@ ATTRIBUTES:
 * `metadata`: A set of key/value pairs that you can attach to a coupon object. It can be useful for storing additional information about the coupon in a structured format.
 
 
-## How to Run
-
-Just start with:
-
-	# Set password used in API requests
-	export API_PASSWORD=MYPASSWORD
-
-	grunt
-
-Server will default to **http://localhost:3014**
-
-## API
+## REST API
 
 List coupons
 
@@ -51,30 +56,32 @@ List coupons
 
 Create new coupon:
 
-	curl -X POST -H "Content-Type: application/json" -d '{ "code": "MYDISCOUNT", "percent_off": 10 }' http://localhost:3014/coupons?password=MYPASSWORD
+	curl -X POST -H "Content-Type: application/json" -d '{ "code": "MYCOUPON", "percent_off": 10 }' http://localhost:3014/coupons?password=MYPASSWORD
 	curl -X POST -H "Content-Type: application/json" -d '{ "email": "mit.edu", "percent_off": 10 }' http://localhost:3014/coupons?password=MYPASSWORD
 
 Update coupon:
 
-	curl -X PUT -H "Content-Type: application/json" -d '{ "percent_off": 20 }' http://localhost:3014/coupons/548cbb2b1ad50708212193d8?password=MYPASSWORD
+	curl -X PUT -H "Content-Type: application/json" -d '{ "percent_off": 20 }' http://localhost:3014/coupons/MYCOUPON?password=MYPASSWORD
 
 Delete coupon:
 
-	curl -X DELETE http://localhost:3014/coupons/5477a6f88906b9fc766c843e?password=MYPASSWORD
+	curl -X DELETE http://localhost:3014/coupons/MYCOUPON?password=MYPASSWORD
 
 Delete all coupons:
 
 	curl -X DELETE http://localhost:3014/coupons/ALL?password=MYPASSWORD
 
+
 ## Implementation
 
 Built on Node.js, Express, and MongoDB.
+
 
 ## Deploying on Heroku
 
 	# Set up and configure app
 	heroku create MYAPPNAME
-	heroku addons:add mongolab
+	heroku addons:create mongolab
 	heroku config:set NODE_ENV=production
 
 	# Set password used in API requests
