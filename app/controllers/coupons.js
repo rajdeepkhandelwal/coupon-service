@@ -4,6 +4,15 @@ var _ = require('lodash');
 var mongoose = require('mongoose');
 var Coupon = mongoose.model('Coupon');
 
+var cleanUpCoupon = function (coupon) {
+	if (!coupon.code) {
+		coupon.code = coupon._id;
+	}
+	delete coupon['_id'];
+	delete coupon['__v'];
+	return coupon;
+};
+
 module.exports = {
 
 	// List all Coupons
@@ -19,6 +28,7 @@ module.exports = {
 				return res.json(400, err);
 			}
 			else {
+				_.forEach(coupons, cleanUpCoupon);
 				return res.json(coupons);
 			}
 		});
@@ -31,6 +41,7 @@ module.exports = {
 				return res.json(400, err);
 			}
 			else {
+				coupon = cleanUpCoupon(coupon);
 				return res.json(coupon);
 			}
 		});
