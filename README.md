@@ -51,7 +51,8 @@ Server will default to **http://localhost:3014**
 
 	{
 		user, // a user ID you can refer to (String)
-		coupon, // associated Coupon
+		code, // Coupon code
+		coupon, // associated Coupon object
 		start, // start date (Date)
 		end, // end date (Date)
 	}
@@ -65,7 +66,7 @@ List coupons
 
 	curl http://localhost:3014/api/coupons?password=MYPASSWORD
 
-Check/get available coupon (404 if not found)
+Check/get available coupon (return code `404` if not found, `412` if found but not applicable)
 
 	curl http://localhost:3014/api/coupons/MYCOUPON?password=MYPASSWORD
 	// The ‘@’ in email is needed to determine to look for an email-based coupon
@@ -96,7 +97,7 @@ Delete all coupons:
 
 ### Discounts
 
-List applied discounts for a user
+List applied discounts for a user:
 
 	curl http://localhost:3014/api/discounts?password=MYPASSWORD&user=548cbb2b1ad50708212193d8
 
