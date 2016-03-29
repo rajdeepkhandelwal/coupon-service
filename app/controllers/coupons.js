@@ -8,7 +8,7 @@ var Coupon = mongoose.model('Coupon');
 var cleanUpCoupon = function (coupon) {
 	delete coupon['_id'];
 	delete coupon['__v'];
-	coupon.id = coupon.code; // to mirror Stripe
+	coupon.id = coupon.code; // to mirror Stripe API
 	return coupon;
 };
 
@@ -17,12 +17,7 @@ module.exports = {
 	// List all Coupons
 	list: function (req, res, next) {
 		var searchQuery = {};
-		if (req.query.from) {
-			var currentTime = new Date();
-			searchQuery = { dateCreated: { "$gte": new Date(req.query.from), "$lt": currentTime } };
-		}
-
-		Coupon.find(searchQuery, null, { sort: {dateCreated: -1} }).lean().exec(function (err, coupons) {
+		Coupon.find(searchQuery, null, { sort: { code: 1 } }).lean().exec(function (err, coupons) {
 			if (err) {
 				return res.status(400).json(err);
 			}
@@ -43,7 +38,6 @@ module.exports = {
 		else {
 			searchQuery.code = req.params.id.toUpperCase();
 		}
-
 		Coupon.find(searchQuery).lean().exec(function (err, coupons) {
 			if (err) {
 				return res.status(400).json(err);
@@ -52,7 +46,6 @@ module.exports = {
 				return res.status(404).json('Coupon not found');
 			}
 			else {
-				//coupons = cleanUpCoupon(coupons);
 				return res.json(cleanUpCoupon(coupons[0]));
 			}
 		});
@@ -77,7 +70,7 @@ module.exports = {
 	// Update a Coupon
 	update: function (req, res, next) {
 		Coupon.update(
-			{ code: req.params.id },
+			{ code: req.params.id.toUpperCase() },
 			req.body,
 			function (updateErr, numberAffected, rawResponse) {
 				if (updateErr) {
@@ -92,16 +85,15 @@ module.exports = {
 
 	// Delete a Coupon
 	delete: function (req, res, next) {
-		var searchParams;
+		var searchQuery;
 		if (req.params.id === 'ALL') {
-			searchParams = {};
+			searchQuery = {};
 		}
 		else {
-			searchParams = { code: req.params.id }
+			searchQuery = { code: req.params.id.toUpperCase() }
 		}
-
 		Coupon.remove(
-			searchParams,
+			searchQuery,
 			function(couponErr, numberAffected, rawResponse) {
 				if (couponErr) {
 					res.status(500).json(couponErr);
