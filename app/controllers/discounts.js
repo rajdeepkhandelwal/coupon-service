@@ -39,12 +39,13 @@ module.exports = {
 
 	// Create new Discount
 	create: function (req, res, next) {
-		Coupon.find({ code: req.body.code }).exec(function (err, coupons) {
+		var couponCode = req.body.code || '';
+		Coupon.find({ code: couponCode.toUpperCase() }).exec(function (err, coupons) {
 			if (err) {
 				return res.status(400).json(err);
 			}
 			else if (coupons.length === 0) {
-				return res.status(404).json('Coupon not found');
+				return res.status(404).json('Coupon ‘' + couponCode.toUpperCase() + '’ not found');
 			}
 			else {
 				// Update or create Discount object
