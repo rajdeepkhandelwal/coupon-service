@@ -3,6 +3,7 @@
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var Discount = mongoose.model('Discount');
+var Coupon = mongoose.model('Coupon');
 
 module.exports = {
 
@@ -16,7 +17,7 @@ module.exports = {
 
 		Discount.find(searchQuery, null, { sort: {dateCreated: -1} }, function (err, discounts) {
 			if (err) {
-				return res.json(400, err);
+				return res.status(400).json(err);
 			}
 			else {
 				return res.json(discounts);
@@ -28,7 +29,7 @@ module.exports = {
 	read: function (req, res, next) {
 		Discount.findById(req.params.id, function (err, discount) {
 			if (err) {
-				return res.json(400, err);
+				return res.status(400).json(err);
 			}
 			else {
 				return res.json(discount);
@@ -38,13 +39,25 @@ module.exports = {
 
 	// Create new Discount
 	create: function (req, res, next) {
-		var newDiscount = new Discount(req.body);
-		newDiscount.save(function (err) {
+		Coupon.find({ code: req.body.code }).exec(function (err, coupons) {
 			if (err) {
-				return res.json(400, err);
+				return res.status(400).json(err);
+			}
+			else if (coupons.length === 0) {
+				return res.status(404).json('Coupon not found');
 			}
 			else {
-				return res.json(newDiscount);
+				var newDiscount = new Discount(req.body);
+				newDiscount.coupon = coupons[0]._id;
+				newDiscount.save(function (err) {
+					if (err) {
+						return res.status(400).json(err);
+					}
+					else {
+						console.log('Applied discount %s to user %s.', newDiscount.code, newDiscount.user)
+						return res.json(newDiscount);
+					}
+				});
 			}
 		});
 	},
@@ -56,10 +69,10 @@ module.exports = {
 			req.body,
 			function (updateErr, numberAffected, rawResponse) {
 				if (updateErr) {
-					res.json(500, updateErr);
+					res.status(500).json(updateErr);
 				}
 				else {
-					res.json(200, 'Updated discount ' + req.params.id);
+					res.status(200).json('Updated discount ' + req.params.id);
 				}
 			}
 		);
@@ -79,10 +92,10 @@ module.exports = {
 			searchParams,
 			function(discountErr, numberAffected, rawResponse) {
 				if (discountErr) {
-					res.json(500, discountErr);
+					res.status(500).json(discountErr);
 				}
 				else {
-					res.json(200, 'Deleted ' + numberAffected + ' discounts');
+					res.status(200).json('Deleted ' + numberAffected + ' discounts');
 				}
 			}
 		);

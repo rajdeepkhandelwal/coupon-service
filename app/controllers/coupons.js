@@ -1,15 +1,14 @@
 'use strict';
 
 var _ = require('lodash');
+var md5 = require('md5');
 var mongoose = require('mongoose');
 var Coupon = mongoose.model('Coupon');
 
 var cleanUpCoupon = function (coupon) {
-	if (!coupon.code) {
-		coupon.code = coupon._id;
-	}
 	delete coupon['_id'];
 	delete coupon['__v'];
+	coupon.id = coupon.code; // to mirror Stripe
 	return coupon;
 };
 
@@ -23,9 +22,9 @@ module.exports = {
 			searchQuery = { dateCreated: { "$gte": new Date(req.query.from), "$lt": currentTime } };
 		}
 
-		Coupon.find(searchQuery, null, { sort: {dateCreated: -1} }, function (err, coupons) {
+		Coupon.find(searchQuery, null, { sort: {dateCreated: -1} }).lean().exec(function (err, coupons) {
 			if (err) {
-				return res.json(400, err);
+				return res.status(400).json(err);
 			}
 			else {
 				_.forEach(coupons, cleanUpCoupon);
@@ -36,13 +35,25 @@ module.exports = {
 
 	// Show a Coupon
 	read: function (req, res, next) {
-		Coupon.findById(req.params.id, function (err, coupon) {
+		var searchQuery = {};
+		if (req.params.id.indexOf('@') !== -1) {
+			// TODO: make email search work
+			//searchQuery.email = new RegExp(req.params.id, 'g');
+		}
+		else {
+			searchQuery.code = req.params.id.toUpperCase();
+		}
+
+		Coupon.find(searchQuery).lean().exec(function (err, coupons) {
 			if (err) {
-				return res.json(400, err);
+				return res.status(400).json(err);
+			}
+			else if (coupons.length === 0) {
+				return res.status(404).json('Coupon not found');
 			}
 			else {
-				coupon = cleanUpCoupon(coupon);
-				return res.json(coupon);
+				//coupons = cleanUpCoupon(coupons);
+				return res.json(cleanUpCoupon(coupons[0]));
 			}
 		});
 	},
@@ -50,12 +61,15 @@ module.exports = {
 	// Create new Coupon
 	create: function (req, res, next) {
 		var newCoupon = new Coupon(req.body);
+		if (!newCoupon.code)
+			newCoupon.code = md5(Date.now() + Math.random());
+		newCoupon.code = newCoupon.code.toUpperCase();
 		newCoupon.save(function (err) {
 			if (err) {
-				return res.json(400, err);
+				return res.status(400).json(err);
 			}
 			else {
-				return res.json(newCoupon);
+				return res.json(cleanUpCoupon(newCoupon));
 			}
 		});
 	},
@@ -63,14 +77,14 @@ module.exports = {
 	// Update a Coupon
 	update: function (req, res, next) {
 		Coupon.update(
-			{ _id: req.params.id },
+			{ code: req.params.id },
 			req.body,
 			function (updateErr, numberAffected, rawResponse) {
 				if (updateErr) {
-					res.json(500, updateErr);
+					res.status(500).json(updateErr);
 				}
 				else {
-					res.json(200, 'Updated coupon ' + req.params.id);
+					res.status(200).json('Updated coupon ' + req.params.id);
 				}
 			}
 		);
@@ -83,17 +97,17 @@ module.exports = {
 			searchParams = {};
 		}
 		else {
-			searchParams = { _id: req.params.id }
+			searchParams = { code: req.params.id }
 		}
 
 		Coupon.remove(
 			searchParams,
 			function(couponErr, numberAffected, rawResponse) {
 				if (couponErr) {
-					res.json(500, couponErr);
+					res.status(500).json(couponErr);
 				}
 				else {
-					res.json(200, 'Deleted ' + numberAffected + ' coupons');
+					res.status(200).json('Deleted ' + numberAffected + ' coupons');
 				}
 			}
 		);

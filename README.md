@@ -74,12 +74,16 @@ Check/get available coupon (404 if not found)
 Create new coupon:
 
 	curl -X POST -H "Content-Type: application/json" -d '{ "code": "MYCOUPON", "percent_off": 10 }' http://localhost:3014/api/coupons?password=MYPASSWORD
+
 	// Email-based: when create discount, if user’s email contains “mit.edu”, discount will be applied
 	curl -X POST -H "Content-Type: application/json" -d '{ "email": "mit.edu", "percent_off": 10 }' http://localhost:3014/api/coupons?password=MYPASSWORD
 
+	// Example: provide free services in a coupon
+	curl -X POST -H "Content-Type: application/json" -d '{ "code": "FREESERVICES", "metadata": { "subscriptions": [{ "id": "unlimited_projects" }] } }' http://localhost:3014/api/coupons?password=MYPASSWORD
+
 Update coupon:
 
-	curl -X PUT -H "Content-Type: application/json" -d '{ "percent_off": 20 }' http://localhost:3014/api/coupons/MYCOUPON?password=MYPASSWORD
+	curl -X PUT -H "Content-Type: application/json" -d '{ "duration": "repeating", "duration_in_months": 6 }' http://localhost:3014/api/coupons/MYCOUPON?password=MYPASSWORD
 
 Delete coupon:
 
