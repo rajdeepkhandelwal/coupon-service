@@ -47,15 +47,15 @@ module.exports = {
 				return res.status(404).json('Coupon not found');
 			}
 			else {
-				var newDiscount = new Discount(req.body);
-				newDiscount.coupon = coupons[0]._id;
-				newDiscount.save(function (err) {
+				// Update or create Discount object
+				req.body.coupon = coupons[0]._id;
+				Discount.update({ code: req.body.code, user: req.body.user }, { $set: req.body }, { upsert: true }, function (err, rowsUpdated) {
 					if (err) {
 						return res.status(400).json(err);
 					}
 					else {
-						console.log('Applied discount %s to user %s.', newDiscount.code, newDiscount.user)
-						return res.json(newDiscount);
+						console.log('Applied discount %s to user %s.', req.body.code, req.body.user)
+						return res.json(req.body);
 					}
 				});
 			}
@@ -87,7 +87,6 @@ module.exports = {
 		else {
 			searchParams = { _id: req.params.id }
 		}
-
 		Discount.remove(
 			searchParams,
 			function(discountErr, numberAffected, rawResponse) {
