@@ -5,6 +5,10 @@ REST API service for discount coupons/vouchers, built in Node.js.
 Inspired by the [Stripe API](https://stripe.com/docs/api#coupons), but sometimes you need coupons without credit cards.
 Also supports discounts based on (partial) email addresses, e.g. “everybody @mit.edu”.
 
+Made by the team at **Weld** ([www.weld.io](https://www.weld.io?utm_source=github-coupon-service)), the code-free app and web creation tool:
+
+[![Weld](https://s3-eu-west-1.amazonaws.com/weld-social-and-blog/gif/weld_explained.gif)](https://www.weld.io?utm_source=github-coupon-service)
+
 
 ## How to Run
 
